@@ -555,7 +555,7 @@ class WebArchive(object):
                 with io.open(path, "rb") as stream:
                     archive._populate_from_stream(stream)
             else:
-                raise WebArchiveException(
+                raise WebArchiveError(
                     "only mode 'r' (reading) is currently supported"
                 )
         else:
