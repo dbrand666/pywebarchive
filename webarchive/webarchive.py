@@ -553,19 +553,19 @@ class WebArchive(object):
                 "must provide either path or stream (but not both)"
             )
 
+        if not isinstance(mode, str):
+            raise WebArchiveError("mode must be a str")
+
+        if mode != "r":
+            raise WebArchiveError(
+                "only mode 'r' (reading) is currently supported"
+            )
+
         archive = cls()
 
-        if isinstance(mode, str):
-            if mode == "r":
-                # Read this webarchive
-                with io.open(path, "rb") if path else nullcontext(stream) as _stream:
-                    archive._populate_from_stream(_stream)
-            else:
-                raise WebArchiveError(
-                    "only mode 'r' (reading) is currently supported"
-                )
-        else:
-            raise WebArchiveError("mode must be a str")
+        # Read this webarchive
+        with io.open(path, "rb") if path else nullcontext(stream) as _stream:
+            archive._populate_from_stream(_stream)
 
         return archive
 
