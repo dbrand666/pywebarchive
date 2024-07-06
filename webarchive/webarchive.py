@@ -5,6 +5,7 @@ import io
 import plistlib
 import mimetypes
 
+from contextlib import nullcontext
 from urllib.parse import urlparse, urljoin
 
 from .exceptions import WebArchiveError
@@ -536,8 +537,8 @@ class WebArchive(object):
         return res
 
     @classmethod
-    def _open(cls, path, mode="r"):
-        """Open the specified webarchive file.
+    def _open(cls, path=None, mode="r", stream=None):
+        """Open the specified webarchive file or binary stream.
 
         Only mode 'r' (reading) is currently supported.
         """
@@ -547,13 +548,18 @@ class WebArchive(object):
         # since that is an implementation detail that could change, but be
         # aware that any changes made here will be very public indeed.
 
+        if (path and stream) or (not path and not stream):
+            raise WebArchiveError(
+                "must provide either path or stream (but not both)"
+            )
+
         archive = cls()
 
         if isinstance(mode, str):
             if mode == "r":
                 # Read this webarchive
-                with io.open(path, "rb") as stream:
-                    archive._populate_from_stream(stream)
+                with io.open(path, "rb") if path else nullcontext(stream) as _stream:
+                    archive._populate_from_stream(_stream)
             else:
                 raise WebArchiveError(
                     "only mode 'r' (reading) is currently supported"
